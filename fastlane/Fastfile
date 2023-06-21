@@ -1,0 +1,18 @@
+before_all do
+    ensure_git_branch(branch: 'master')
+    ensure_git_status_clean
+    git_pull
+end
+
+platform :ios do
+
+    lane :dev_build do
+        increment_build_number_in_plist(xcodeproj: './ios/e2e.xcodeproj', target: 'e2e_dev')
+        increment_version_number_in_plist(xcodeproj: './ios/e2e.xcodeproj', bump_type: 'patch')
+        gym(scheme: 'e2e_dev', workspace: './ios/e2e.xcworkspace')
+        upload_to_testflight(username: 'aymather@gmail.com', app_identifier: 'com.e2e')
+        commit_version_bump(message: 'Bump version to: ${VERSION_NUMBER}')
+        push_to_git_remote
+    end
+
+end
